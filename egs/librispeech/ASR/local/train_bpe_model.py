@@ -30,6 +30,8 @@ import shutil
 from pathlib import Path
 from typing import Dict
 
+import logging
+
 import sentencepiece as spm
 
 
@@ -89,6 +91,14 @@ def main():
     # places that are using it.
 
     model_file = Path(model_prefix + ".model")
+    print(f"model_file {model_file}")
+    print(f"train_text {train_text}")
+    print(f"vocab_size {vocab_size}")
+    print(f"model_type {model_type}")
+    print(f"model_prefix {model_prefix}")
+    print(f"input_sentence_size {input_sentence_size}")
+    print(f"character_coverage {character_coverage}")
+    print(f"user_defined_symbols {user_defined_symbols}")
     if not model_file.is_file():
         spm.SentencePieceTrainer.train(
             input=train_text,

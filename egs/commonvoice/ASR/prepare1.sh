@@ -77,20 +77,21 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   # If you have pre-downloaded it to /path/to/$release,
   # you can create a symlink
   #
-  #   ln -sfv /path/to/$release $dl_dir/$release
+     ln -sfv /data/banner/aidatasets/commonvoice/download/common-voice-3 $dl_dir/$release
+     ls $dl_dir/$release
   #
-  if [ ! -d $dl_dir/$release/$lang/clips ]; then
-    lhotse download commonvoice --languages $lang --release $release $dl_dir
-  fi
+#  if [ ! -d $dl_dir/$release/$lang/clips ]; then
+#    lhotse download commonvoice --languages $lang --release $release $dl_dir
+#  fi
 
   # If you have pre-downloaded it to /path/to/musan,
   # you can create a symlink
   #
-  #   ln -sfv /path/to/musan $dl_dir/
+     ln -sfv /data/banner/aidatasets/commonvoice/download/musan $dl_dir/
   #
-  if [ ! -d $dl_dir/musan ]; then
-    lhotse download musan $dl_dir
-  fi
+  #if [ ! -d $dl_dir/musan ]; then
+  #  lhotse download musan $dl_dir
+  #fi
 fi
 
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then

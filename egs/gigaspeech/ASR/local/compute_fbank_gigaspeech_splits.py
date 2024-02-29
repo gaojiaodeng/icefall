@@ -16,6 +16,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+import torch
+from torch.utils.data import dataloader
+from torch.multiprocessing import reductions
+from multiprocessing.reduction import ForkingPickler
+ 
+default_collate_func = dataloader.default_collate
+ 
+ 
+def default_collate_override(batch):
+  dataloader._use_shared_memory = False
+  return default_collate_func(batch)
+ 
+setattr(dataloader, 'default_collate', default_collate_override)
+ 
+for t in torch._storage_classes:
+  if sys.version_info[0] == 2:
+    if t in ForkingPickler.dispatch:
+        del ForkingPickler.dispatch[t]
+  else:
+    if t in ForkingPickler._extra_reducers:
+        del ForkingPickler._extra_reducers[t]
+
+
+
 import argparse
 import logging
 from datetime import datetime
@@ -52,6 +77,14 @@ def get_parser():
     )
 
     parser.add_argument(
+        "--subset",
+        type=str,
+        default="XL",
+        choices=["XL", "L", "M", "S", "XS"],
+        help="Which subset to work with",
+    )
+
+    parser.add_argument(
         "--num-splits",
         type=int,
         required=True,
@@ -76,7 +109,7 @@ def get_parser():
 
 def compute_fbank_gigaspeech_splits(args):
     num_splits = args.num_splits
-    output_dir = f"data/fbank/XL_split"
+    output_dir = f"data/fbank/{args.subset}_split"
     output_dir = Path(output_dir)
     assert output_dir.exists(), f"{output_dir} does not exist!"
 
@@ -99,12 +132,12 @@ def compute_fbank_gigaspeech_splits(args):
         idx = f"{i}".zfill(num_digits)
         logging.info(f"Processing {idx}/{num_splits}")
 
-        cuts_path = output_dir / f"gigaspeech_cuts_XL.{idx}.jsonl.gz"
+        cuts_path = output_dir / f"cuts_{args.subset}.{idx}.jsonl.gz"
         if cuts_path.is_file():
             logging.info(f"{cuts_path} exists - skipping")
             continue
 
-        raw_cuts_path = output_dir / f"gigaspeech_cuts_XL_raw.{idx}.jsonl.gz"
+        raw_cuts_path = output_dir / f"cuts_{args.subset}_raw.{idx}.jsonl.gz"
 
         logging.info(f"Loading {raw_cuts_path}")
         cut_set = CutSet.from_file(raw_cuts_path)
@@ -113,7 +146,7 @@ def compute_fbank_gigaspeech_splits(args):
 
         cut_set = cut_set.compute_and_store_features_batch(
             extractor=extractor,
-            storage_path=f"{output_dir}/gigaspeech_feats_{idx}",
+            storage_path=f"{output_dir}/feats_{args.subset}_{idx}",
             num_workers=args.num_workers,
             batch_duration=args.batch_duration,
             overwrite=True,
