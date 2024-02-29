@@ -16,6 +16,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+import torch
+from torch.utils.data import dataloader
+from torch.multiprocessing import reductions
+from multiprocessing.reduction import ForkingPickler
+
+default_collate_func = dataloader.default_collate
+
+
+def default_collate_override(batch):
+  dataloader._use_shared_memory = False
+  return default_collate_func(batch)
+
+setattr(dataloader, 'default_collate', default_collate_override)
+
+for t in torch._storage_classes:
+  if sys.version_info[0] == 2:
+    if t in ForkingPickler.dispatch:
+        del ForkingPickler.dispatch[t]
+  else:
+    if t in ForkingPickler._extra_reducers:
+        del ForkingPickler._extra_reducers[t]
+
 import logging
 from pathlib import Path
 
@@ -38,7 +61,7 @@ def compute_fbank_gigaspeech():
     # number of seconds in a batch
     batch_duration = 1000
 
-    subsets = ("L", "M", "S", "XS", "DEV", "TEST")
+    subsets = ("XS",)
 
     device = torch.device("cpu")
     if torch.cuda.is_available():
@@ -48,17 +71,19 @@ def compute_fbank_gigaspeech():
     logging.info(f"device: {device}")
 
     for partition in subsets:
-        cuts_path = in_out_dir / f"gigaspeech_cuts_{partition}.jsonl.gz"
+        logging.info(f"partition: {partition}")
+        cuts_path = in_out_dir / f"cuts_{partition}.jsonl.gz"
         if cuts_path.is_file():
             logging.info(f"{cuts_path} exists - skipping")
             continue
 
-        raw_cuts_path = in_out_dir / f"gigaspeech_cuts_{partition}_raw.jsonl.gz"
+        raw_cuts_path = in_out_dir / f"cuts_{partition}_raw.jsonl.gz"
 
         logging.info(f"Loading {raw_cuts_path}")
         cut_set = CutSet.from_file(raw_cuts_path)
 
         logging.info("Computing features")
+        logging.info(f"cut_set: {cut_set}")
 
         cut_set = cut_set.compute_and_store_features_batch(
             extractor=extractor,
