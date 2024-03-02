@@ -68,8 +68,8 @@ def preprocess_giga_speech(args):
     #    "XL",
     #    "L",
     #    "M",
-    #    "S",
-        "XS",
+        "S",
+    #    "XS",
     )
 
     logging.info("Loading manifest (may take 4 minutes)")

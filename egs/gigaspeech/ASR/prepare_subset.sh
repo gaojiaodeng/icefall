@@ -8,7 +8,7 @@ set -eou pipefail
 nj=15
 stage=0
 stop_stage=100
-subset=XS # for all available options, refer to https://github.com/lhotse-speech/lhotse/blob/b3373c0d27a23ba0acd516a8e07f12d2ac6deab0/lhotse/recipes/gigaspeech.py#L29
+subset=S # for all available options, refer to https://github.com/lhotse-speech/lhotse/blob/b3373c0d27a23ba0acd516a8e07f12d2ac6deab0/lhotse/recipes/gigaspeech.py#L29
 
 # Split XL subset to a number of pieces (about 2000)
 # This is to avoid OOM during feature extraction.
@@ -192,7 +192,7 @@ if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
   fi
 
   if [ ! -f $lang_dir/transcript_words.txt ]; then
-    gunzip -c "data/manifests/gigaspeech_supervisions_XS.jsonl.gz" \
+    gunzip -c "data/manifests/gigaspeech_supervisions_S.jsonl.gz" \
       | jq '.text' \
       | sed 's/"//g' \
       > $lang_dir/transcript_words.txt

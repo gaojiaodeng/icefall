@@ -61,7 +61,7 @@ def compute_fbank_gigaspeech():
     # number of seconds in a batch
     batch_duration = 1000
 
-    subsets = ("XS",)
+    subsets = ("S",)
 
     device = torch.device("cpu")
     if torch.cuda.is_available():
