@@ -482,6 +482,11 @@ class LibriSpeechAsrDataModule:
         return load_manifest_lazy(self.args.manifest_dir / "cuts_S.jsonl.gz")
 
     @lru_cache()
+    def common_voice_en_cuts(self) -> CutSet:
+        logging.info("About to get common voice en cuts")
+        return load_manifest_lazy(self.args.manifest_dir / "cv-en_cuts_train.jsonl.gz")
+
+    @lru_cache()
     def gigaspeech_dev_cuts(self) -> CutSet:
         logging.info("About to get Gigaspeech dev cuts")
         return load_manifest_lazy(
