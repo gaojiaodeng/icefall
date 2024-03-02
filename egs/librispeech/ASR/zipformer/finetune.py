@@ -1316,17 +1316,18 @@ def run(rank, world_size, args):
 
     librispeech = LibriSpeechAsrDataModule(args)
 
-    gigaspeech_cuts = librispeech.gigaspeech_subset_small_cuts()
+    # gigaspeech_cuts = librispeech.gigaspeech_subset_small_cuts()
+    fine_tune_cuts =  librispeech.common_voice_en_cuts()
     if params.use_mux:
         librispeech_cuts = librispeech.train_all_shuf_cuts()
         train_cuts = CutSet.mux(
-            gigaspeech_cuts,  # num cuts = 688182
+            fine_tune_cuts,  # num cuts = 688182
             librispeech_cuts,  # num cuts = 843723
             weights=[688182, 843723],
             stop_early=True,
         )
     else:
-        train_cuts = gigaspeech_cuts
+        train_cuts = fine_tune_cuts
     logging.info(train_cuts)
 
     def remove_short_and_long_utt(c: Cut):
