@@ -33,25 +33,25 @@ class MultiDataset:
             - aishell2_cuts_train.jsonl.gz
         """
         self.fbank_dir = Path(args.manifest_dir)
-        self.use_tal_csasr = args.use_tal_csasr
         self.use_librispeech = args.use_librispeech
-        self.use_aishell2 = args.use_aishell2
+        self.use_gigaspeech = args.use_gigaspeech
+        self.use_commonvoice = args.use_commonvoice
 
     def train_cuts(self) -> CutSet:
         logging.info("About to get multidataset train cuts")
 
-        # AISHELL-2
-        if self.use_aishell2:
-            logging.info("Loading Aishell-2 in lazy mode")
-            aishell_2_cuts = load_manifest_lazy(
-                self.fbank_dir / "aishell2_cuts_train.jsonl.gz"
+        # GigaSpeech
+        if self.use_gigaspeech:
+            logging.info("Loading GigaSpeech in lazy mode")
+            gigaspeech_cuts = load_manifest_lazy(
+                self.fbank_dir / "cuts_L.jsonl.gz"
             )
 
-        # TAL-CSASR
-        if self.use_tal_csasr:
-            logging.info("Loading TAL-CSASR in lazy mode")
-            tal_csasr_cuts = load_manifest_lazy(
-                self.fbank_dir / "tal_csasr_cuts_train_set.jsonl.gz"
+        # CommonVoice
+        if self.use_commonvoice:
+            logging.info("Loading CommonVoice in lazy mode")
+            commonvoice_cuts = load_manifest_lazy(
+                self.fbank_dir / "cv-en_cuts_train.jsonl.gz"
             )
 
         # LibriSpeech
@@ -61,140 +61,85 @@ class MultiDataset:
             train_clean_360_cuts = self.train_clean_360_cuts()
             train_other_500_cuts = self.train_other_500_cuts()
 
-        if self.use_tal_csasr and self.use_librispeech and self.use_aishell2:
+        if self.use_gigaspeech and self.use_librispeech and self.use_commonvoice:
             return CutSet.mux(
-                aishell_2_cuts,
+                gigaspeech_cuts,
                 train_clean_100_cuts,
                 train_clean_360_cuts,
                 train_other_500_cuts,
-                tal_csasr_cuts,
+                commonvoice_cuts,
                 weights=[
-                    len(aishell_2_cuts),
+                    len(gigaspeech_cuts),
                     len(train_clean_100_cuts),
                     len(train_clean_360_cuts),
                     len(train_other_500_cuts),
-                    len(tal_csasr_cuts),
-                ],
-            )
-        elif not self.use_tal_csasr and self.use_librispeech and self.use_aishell2:
-            return CutSet.mux(
-                aishell_2_cuts,
-                train_clean_100_cuts,
-                train_clean_360_cuts,
-                train_other_500_cuts,
-                weights=[
-                    len(aishell_2_cuts),
-                    len(train_clean_100_cuts),
-                    len(train_clean_360_cuts),
-                    len(train_other_500_cuts),
-                ],
-            )
-        elif self.use_tal_csasr and not self.use_librispeech and self.use_aishell2:
-            return CutSet.mux(
-                aishell_2_cuts,
-                tal_csasr_cuts,
-                weights=[
-                    len(aishell_2_cuts),
-                    len(tal_csasr_cuts),
-                ],
-            )
-        elif self.use_tal_csasr and self.use_librispeech and not self.use_aishell2:
-            return CutSet.mux(
-                train_clean_100_cuts,
-                train_clean_360_cuts,
-                train_other_500_cuts,
-                tal_csasr_cuts,
-                weights=[
-                    len(train_clean_100_cuts),
-                    len(train_clean_360_cuts),
-                    len(train_other_500_cuts),
-                    len(tal_csasr_cuts),
+                    len(commonvoice_cuts),
                 ],
             )
         else:
             raise NotImplementedError(
                 f"""Not implemented for 
-                use_aishell2: {self.use_aishell2}
+                use_gigaspeech: {self.use_gigaspeech}
                 use_librispeech: {self.use_librispeech}
-                use_tal_csasr: {self.use_tal_csasr}"""
+                use_commonvoice: {self.use_commonvoice}"""
             )
 
     def dev_cuts(self) -> CutSet:
         logging.info("About to get multidataset dev cuts")
 
-        # AISHELL-2
-        logging.info("Loading Aishell-2 DEV set in lazy mode")
-        aishell2_dev_cuts = load_manifest_lazy(
-            self.fbank_dir / "aishell2_cuts_dev.jsonl.gz"
+        # GigaSpeech
+        logging.info("Loading GigaSpeech DEV set in lazy mode")
+        gigaspeech_dev_cuts = load_manifest_lazy(
+            self.fbank_dir / "cuts_DEV.jsonl.gz"
         )
 
         # LibriSpeech
         dev_clean_cuts = self.dev_clean_cuts()
         dev_other_cuts = self.dev_other_cuts()
 
-        logging.info("Loading TAL-CSASR set in lazy mode")
-        tal_csasr_dev_cuts = load_manifest_lazy(
-            self.fbank_dir / "tal_csasr_cuts_dev_set.jsonl.gz"
+        logging.info("Loading CommonVoice set in lazy mode")
+        commonvoice_dev_cuts = load_manifest_lazy(
+            self.fbank_dir / "cv-en_cuts_dev.jsonl.gz"
         )
 
         return CutSet.mux(
-            aishell2_dev_cuts,
+            gigaspeech_dev_cuts,
             dev_clean_cuts,
             dev_other_cuts,
-            tal_csasr_dev_cuts,
+            commonvoice_dev_cuts,
             weights=[
-                len(aishell2_dev_cuts),
+                len(gigaspeech_dev_cuts),
                 len(dev_clean_cuts),
                 len(dev_other_cuts),
-                len(tal_csasr_dev_cuts),
+                len(commonvoice_dev_cuts),
             ],
         )
 
     def test_cuts(self) -> Dict[str, CutSet]:
         logging.info("About to get multidataset test cuts")
 
-        # AISHELL-2
-        if self.use_aishell2:
-            logging.info("Loading Aishell-2 set in lazy mode")
-            aishell2_test_cuts = load_manifest_lazy(
-                self.fbank_dir / "aishell2_cuts_test.jsonl.gz"
-            )
-            aishell2_dev_cuts = load_manifest_lazy(
-                self.fbank_dir / "aishell2_cuts_dev.jsonl.gz"
-            )
+        # GigaSpeech
+        logging.info("Loading GigaSpeech test set in lazy mode")
+        gigaspeech_test_cuts = load_manifest_lazy(
+            self.fbank_dir / "cuts_TEST.jsonl.gz"
+        )
 
         # LibriSpeech
-        if self.use_librispeech:
-            test_clean_cuts = self.test_clean_cuts()
-            test_other_cuts = self.test_other_cuts()
+        test_clean_cuts = self.test_clean_cuts()
+        test_other_cuts = self.test_other_cuts()
 
-        logging.info("Loading TAL-CSASR set in lazy mode")
-        tal_csasr_test_cuts = load_manifest_lazy(
-            self.fbank_dir / "tal_csasr_cuts_test_set.jsonl.gz"
-        )
-        tal_csasr_dev_cuts = load_manifest_lazy(
-            self.fbank_dir / "tal_csasr_cuts_dev_set.jsonl.gz"
+        logging.info("Loading CommonVoice set in lazy mode")
+        commonvoice_test_cuts = load_manifest_lazy(
+            self.fbank_dir / "cv-en_cuts_test.jsonl.gz"
         )
 
         test_cuts = {
-            "tal_csasr_test": tal_csasr_test_cuts,
-            "tal_csasr_dev": tal_csasr_dev_cuts,
+            "librispeech_test_clean": test_clean_cuts,
+            "librispeech_test_other": test_other_cuts,
+            "gigaspeech_test": gigaspeech_test_cuts,
+            "commonvoice_test": commonvoice_test_cuts,
         }
 
-        if self.use_aishell2:
-            test_cuts.update(
-                {
-                    "aishell-2_test": aishell2_test_cuts,
-                    "aishell-2_dev": aishell2_dev_cuts,
-                }
-            )
-        if self.use_librispeech:
-            test_cuts.update(
-                {
-                    "librispeech_test_clean": test_clean_cuts,
-                    "librispeech_test_other": test_other_cuts,
-                }
-            )
         return test_cuts
 
     @lru_cache()

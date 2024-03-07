@@ -489,6 +489,20 @@ def get_parser():
         help="Whether to use Aishell-2 training data.",
     )
 
+    parser.add_argument(
+        "--use-gigaspeech",
+        type=str2bool,
+        default=False,
+        help="Whether to use gigaspeech training data.",
+    )
+
+    parser.add_argument(
+        "--use-commonvoice",
+        type=str2bool,
+        default=False,
+        help="Whether to use commonvoice training data.",
+    )
+
     add_model_arguments(parser)
 
     return parser
