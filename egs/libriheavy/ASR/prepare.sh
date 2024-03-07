@@ -63,7 +63,7 @@ if [ $stage -le -1 ] && [ $stop_stage -ge -1 ]; then
   #   ln -sfv /path/to/librilight $dl_dir/librilight
   #
   mkdir -p $dl_dir/librilight
-  for subset in small medium large; do
+  for subset in small medium; do
     log "Downloading ${subset} subset."
     if [ ! -d $dl_dir/librilight/${subset} ]; then
       wget -P $dl_dir/librilight -c https://dl.fbaipublicfiles.com/librilight/data/${subset}.tar 
@@ -83,7 +83,7 @@ if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   #   ln -sfv /path/to/libriheavy $dl_dir/libriheavy
   #
   mkdir -p $dl_dir/libriheavy
-  for subset in small medium large dev test_clean test_other; do
+  for subset in small medium dev test_clean test_other; do
     if [ ! -e $dl_dir/libriheavy/libriheavy_cuts_${subset}.jsonl.gz ]; then
       log "Downloading ${subset} subset."
       wget -P $dl_dir/libriheavy -c https://huggingface.co/datasets/pkufool/libriheavy/resolve/main/libriheavy_cuts_${subset}.jsonl.gz
@@ -131,7 +131,7 @@ fi
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   log "Stage 3: Prepare Libriheavy manifests"
   mkdir -p $manifests_dir
-  for subset in small medium large dev test_clean test_other; do
+  for subset in small medium dev test_clean test_other; do
     if [ ! -e $manifests_dir/libriheavy_cuts_${subset}.jsonl.gz ]; then
       log "Prepare manifest for subset : ${subset}"
       ./local/prepare_manifest.py $dl_dir/libriheavy/libriheavy_cuts_${subset}.jsonl.gz $manifests_dir
@@ -164,8 +164,9 @@ fi
 
 num_per_split=8000
 if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
-  log "Stage 6: Split medium and large subsets."
-  for subset in medium large; do
+  log "Stage 6: Split medium subsets."
+#  for subset in medium; do
+    subset = medium
     log "Spliting subset : $subset"
     split_dir=$manifests_dir/libriheavy_${subset}_split
     mkdir -p $split_dir
@@ -173,17 +174,18 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
       lhotse split-lazy $manifests_dir/libriheavy_cuts_${subset}.jsonl.gz $split_dir $num_per_split
       touch $split_dir/.split_completed
     fi
-  done
+#  done
 fi
 
 if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
-  log "Stage 7: Compute fbank for medium and large subsets"
+  log "Stage 7: Compute fbank for medium subsets"
   mkdir -p $fbank_dir
   chunk_size=20
-  for subset in medium large; do
-    if [ $subset == "large" ]; then
-      chunk_size=200
-    fi
+#  for subset in medium; do
+#    if [ $subset == "large" ]; then
+#      chunk_size=200
+#    fi
+    subset = medium
     num_splits=$(find $manifests_dir/libriheavy_${subset}_split -name "libriheavy_cuts_${subset}.*.jsonl.gz" | wc -l)
     if [ ! -e $fbank_dir/.libriheavy.${subset}.done ]; then
       for i in $(seq 0 1 6); do
@@ -202,18 +204,19 @@ if [ $stage -le 7 ] && [ $stop_stage -ge 7 ]; then
       wait
       touch $fbank_dir/.libriheavy.${subset}.done
     fi
-  done
+#  done
 fi
 
 if [ $stage -le 8 ] && [ $stop_stage -ge 8 ]; then
   log "Stage 8: Combine features for medium and large subsets."
-  for subset in medium large; do
+#  for subset in medium large; do
+    subset = medium
     log "Combining $subset subset."
     if [ ! -f $fbank_dir/libriheavy_cuts_${subset}.jsonl.gz ]; then
       pieces=$(find $fbank_dir/libriheavy_${subset}_split -name "libriheavy_cuts_${subset}.*.jsonl.gz")
       lhotse combine $pieces $fbank_dir/libriheavy_cuts_${subset}.jsonl.gz
     fi
-  done
+#  done
 fi
 
 if [ $stage -le 9 ] && [ $stop_stage -ge 9 ]; then
@@ -269,7 +272,7 @@ fi
 if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
   log "Stage 11: Prepare language model for normalized text"
 
-  for subset in small medium large; do
+  for subset in small medium; do
     if [ ! -f $manifests_dir/texts_${subset} ]; then
       gunzip -c $manifests_dir/libriheavy_cuts_${subset}.jsonl.gz \
         | jq '.supervisions[].text' | sed 's/"//;s/\\//g;s/"$//' \
