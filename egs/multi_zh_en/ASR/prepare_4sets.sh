@@ -67,7 +67,7 @@ if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
     ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/cuts_L.jsonl.gz) .
     ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/cuts_TEST.jsonl.gz) .
 
-    ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/L_split) .
+    ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/XS_split) .
     ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/*.lca) .
     ln -svf $(realpath ../../../../gigaspeech/ASR/data/fbank/) ./gigaspeech
     cd ../..

@@ -44,7 +44,7 @@ class MultiDataset:
         if self.use_gigaspeech:
             logging.info("Loading GigaSpeech in lazy mode")
             gigaspeech_cuts = load_manifest_lazy(
-                self.fbank_dir / "cuts_L.jsonl.gz"
+                self.fbank_dir / "cuts_XS.jsonl.gz"
             )
 
         # CommonVoice
