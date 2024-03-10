@@ -39,7 +39,7 @@ class MultiDataset:
         logging.info("About to get multidataset train cuts")
 
         filenames = glob.glob(
-            f"{self.manifest_dir}/multidataset_split_1998/multidataset/multidataset_cuts_train.*.jsonl.gz"
+            f"{self.manifest_dir}/multidataset_split_28/multidataset/multidataset_cuts_train.*.jsonl.gz"
         )
 
         pattern = re.compile(r"multidataset_cuts_train.([0-9]+).jsonl.gz")
