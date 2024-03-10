@@ -39,7 +39,7 @@ stop_stage=100
 
 # Split all dataset to this number of pieces and mix each dataset pieces
 # into multidataset pieces with shuffling.
-num_splits=1998
+num_splits=28
 
 dl_dir=$PWD/download
 
@@ -316,17 +316,17 @@ fi
 
 if [ $stage -le 10 ] && [ $stop_stage -ge 10 ]; then
   log "Stage 10: Prepare the other datasets"
-  # GigaSpeech
-  if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
-    log "Dataset: GigaSpeech"
-    ./prepare_giga_speech.sh --stop_stage 5
-  fi
-
-  # CommonVoice
-  if [[ "${multidataset[@]}" =~ "commonvoice" ]]; then
-    log "Dataset: CommonVoice"
-    ./prepare_common_voice.sh
-  fi
+#  # GigaSpeech
+#  if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
+#    log "Dataset: GigaSpeech"
+#    ./prepare_giga_speech.sh --stop_stage 5
+#  fi
+#
+#  # CommonVoice
+#  if [[ "${multidataset[@]}" =~ "commonvoice" ]]; then
+#    log "Dataset: CommonVoice"
+#    ./prepare_common_voice.sh
+#  fi
 fi
 
 if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
@@ -340,15 +340,15 @@ if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
       touch $split_dir/.librispeech_split.done
     fi
 
-    if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
-      log "Split GigaSpeech XL"
-      if [ ! -f $split_dir/.gigaspeech_XL_split.done ]; then
-	cd $split_dir
-        ln -sv ../gigaspeech_XL_split_2000/gigaspeech_cuts_XL.*.jsonl.gz .
-        cd ../../..
-	touch $split_dir/.gigaspeech_XL_split.done
-      fi
-    fi
+#    if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
+#      log "Split GigaSpeech S"
+#      if [ ! -f $split_dir/.gigaspeech_S_split.done ]; then
+#	      cd $split_dir
+#        ln -sv ../S_split_2000/cuts_S.*.jsonl.gz .
+#        cd ../../..
+#	      touch $split_dir/.gigaspeech_XL_split.done
+#      fi
+#    fi
 
     if [[ "${multidataset[@]}" =~ "commonvoice" ]]; then
       log "Split CommonVoice"
@@ -361,9 +361,9 @@ if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
     if [ ! -f $split_dir/.multidataset_mix.done ]; then
       log "Mix multidataset"
       for ((seq=1; seq<=$num_splits; seq++)); do
-	fseq=$(printf "%04d" $seq)
-	gunzip -c $split_dir/*.*${fseq}.jsonl.gz | \
-	  shuf | gzip -c > $split_dir/multidataset/multidataset_cuts_train.${fseq}.jsonl.gz
+        fseq=$(printf "%04d" $seq)
+        gunzip -c $split_dir/*.*${fseq}.jsonl.gz | \
+        shuf | gzip -c > $split_dir/multidataset/multidataset_cuts_train.${fseq}.jsonl.gz
       done
       touch $split_dir/.multidataset_mix.done
     fi
