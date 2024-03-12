@@ -1,1 +1,1 @@
-../../../librispeech/ASR/zipformer\export-onnx.py
+../../../librispeech/ASR/zipformer/export-onnx.py
