@@ -117,7 +117,7 @@ class CommonVoiceAsrDataModule:
         group.add_argument(
             "--num-buckets",
             type=int,
-            default=100,
+            default=30,
             help="The number of buckets for the DynamicBucketingSampler"
             "(you might want to increase it for larger datasets).",
         )
@@ -366,8 +366,7 @@ class CommonVoiceAsrDataModule:
         valid_sampler = DynamicBucketingSampler(
             cuts_valid,
             max_duration=self.args.max_duration,
-            num_buckets=self.args.num_buckets,
-            buffer_size=self.args.num_buckets * 2000,
+
             shuffle=False,
         )
         logging.info("About to create dev dataloader")
