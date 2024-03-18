@@ -66,6 +66,7 @@ import torch
 import torch.multiprocessing as mp
 import torch.nn as nn
 from asr_datamodule import LibriSpeechAsrDataModule
+from multidataset import MultiDataset
 from decoder import Decoder
 from joiner import Joiner
 from lhotse.cut import Cut
@@ -466,6 +467,13 @@ def get_parser():
         type=str2bool,
         default=False,
         help="Whether to use half precision training.",
+    )
+
+    parser.add_argument(
+        "--use-multidataset",
+        type=str2bool,
+        default=False,
+        help="Whether to use multidataset to train.",
     )
 
     add_model_arguments(parser)
@@ -1174,19 +1182,23 @@ def run(rank, world_size, args):
 
     librispeech = LibriSpeechAsrDataModule(args)
 
-    if params.full_libri:
-        train_cuts = librispeech.train_all_shuf_cuts()
-
-        # previously we used the following code to load all training cuts,
-        # strictly speaking, shuffled training cuts should be used instead,
-        # but we leave the code here to demonstrate that there is an option
-        # like this to combine multiple cutsets
-
-        # train_cuts = librispeech.train_clean_100_cuts()
-        # train_cuts += librispeech.train_clean_360_cuts()
-        # train_cuts += librispeech.train_other_500_cuts()
+    if params.use_multidataset:
+        multidataset = MultiDataset(params.manifest_dir)
+        train_cuts = multidataset.train_cuts()
     else:
-        train_cuts = librispeech.train_clean_100_cuts()
+        if params.full_libri:
+            train_cuts = librispeech.train_all_shuf_cuts()
+
+            # previously we used the following code to load all training cuts,
+            # strictly speaking, shuffled training cuts should be used instead,
+            # but we leave the code here to demonstrate that there is an option
+            # like this to combine multiple cutsets
+
+            # train_cuts = librispeech.train_clean_100_cuts()
+            # train_cuts += librispeech.train_clean_360_cuts()
+            # train_cuts += librispeech.train_other_500_cuts()
+        else:
+            train_cuts = librispeech.train_clean_100_cuts()
 
     def remove_short_and_long_utt(c: Cut):
         # Keep only utterances with duration between 1 second and 20 seconds
@@ -1242,7 +1254,7 @@ def run(rank, world_size, args):
     valid_cuts += librispeech.dev_other_cuts()
     valid_dl = librispeech.valid_dataloaders(valid_cuts)
 
-    if not params.print_diagnostics:
+    if not params.use_multidataset and not params.print_diagnostics:
         scan_pessimistic_batches_for_oom(
             model=model,
             train_dl=train_dl,
