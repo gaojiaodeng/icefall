@@ -39,7 +39,7 @@ stop_stage=100
 
 # Split all dataset to this number of pieces and mix each dataset pieces
 # into multidataset pieces with shuffling.
-num_splits=28
+num_splits=29
 
 dl_dir=$PWD/download
 
@@ -332,7 +332,7 @@ fi
 if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
   log "Stage 11: Create multidataset"
   split_dir=data/fbank/multidataset_split_${num_splits}
-  if [ ! -f data/fbank/multidataset_split/.multidataset.done ]; then
+  if [ ! -f $split_dir/.multidataset.done ]; then
     mkdir -p $split_dir/multidataset
     log "Split LibriSpeech"
     if [ ! -f $split_dir/.librispeech_split.done ]; then
@@ -360,14 +360,14 @@ if [ $stage -le 11 ] && [ $stop_stage -ge 11 ]; then
 
     if [ ! -f $split_dir/.multidataset_mix.done ]; then
       log "Mix multidataset"
-      for ((seq=1; seq<=$num_splits; seq++)); do
-        fseq=$(printf "%04d" $seq)
+      for ((seq=0; seq<$nums_plits; seq++)); do
+        fseq=$(printf "%02d" $seq)
         gunzip -c $split_dir/*.*${fseq}.jsonl.gz | \
         shuf | gzip -c > $split_dir/multidataset/multidataset_cuts_train.${fseq}.jsonl.gz
       done
       touch $split_dir/.multidataset_mix.done
     fi
 
-    touch data/fbank/multidataset_split/.multidataset.done
+    touch $split_dir/.multidataset.done
   fi
 fi
