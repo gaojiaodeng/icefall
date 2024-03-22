@@ -94,7 +94,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
 
     if [ ! -f $split_dir/.multidataset_mix.done ]; then
       log "Mix multidataset"
-      for ((seq=0; seq<${nums_plits}; seq++)); do
+      for ((seq=0; seq<${num_splits}; seq++)); do
         fseq=$(printf "%02d" $seq)
         gunzip -c $split_dir/*.*${fseq}.jsonl.gz | \
         shuf | gzip -c > $split_dir/multidataset/multidataset_cuts_train.${fseq}.jsonl.gz
