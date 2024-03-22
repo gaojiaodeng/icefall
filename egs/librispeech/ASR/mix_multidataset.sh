@@ -10,7 +10,7 @@ stop_stage=100
 
 num_splits=0
 
-giga_Level=S
+giga_level=S
 
 dl_dir=$PWD/download
 
@@ -56,9 +56,9 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
       ln -svf $PWD/../../gigaspeech/ASR/data/fbank/cuts_* data/fbank/.
       ln -svf $PWD/../../gigaspeech/ASR/data/fbank/feats_* data/fbank/.
       ln -svf $PWD/../../gigaspeech/ASR/data/fbank/gigaspeech_* data/fbank/.
-      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_Level}_split data/fbank/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_level}_split data/fbank/.
       mkdir -p  data/fbank/multidataset_split_${num_splits}
-      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_Level}_split/cuts_${giga_Level}.*.jsonl.gz data/fbank/multidataset_split_${num_splits}/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_level}_split/cuts_${giga_level}.*.jsonl.gz data/fbank/multidataset_split_${num_splits}/.
       touch data/.giga_dataset.done
     fi
   fi
