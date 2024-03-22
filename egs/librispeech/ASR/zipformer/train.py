@@ -498,6 +498,13 @@ def get_parser():
         help="Whether to use multidataset to train.",
     )
 
+    parser.add_argument(
+        "--num-splits",
+        type=int,
+        default=29,
+        help="multidataset splits number.",
+    )
+
     add_model_arguments(parser)
 
     return parser
@@ -1205,7 +1212,7 @@ def run(rank, world_size, args):
     librispeech = LibriSpeechAsrDataModule(args)
 
     if params.use_multidataset:
-        multidataset = MultiDataset(params.manifest_dir)
+        multidataset = MultiDataset(params.manifest_dir, params.num_splits)
         train_cuts = multidataset.train_cuts()
     else:
         if params.full_libri:

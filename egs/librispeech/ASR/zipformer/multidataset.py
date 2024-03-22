@@ -25,7 +25,7 @@ from lhotse import CutSet, load_manifest_lazy
 
 
 class MultiDataset:
-    def __init__(self, manifest_dir: str):
+    def __init__(self, manifest_dir: str, num_splits: int):
         """
         Args:
           manifest_dir:
@@ -34,12 +34,13 @@ class MultiDataset:
             - multidataset_split_1998/multidataset/multidataset_cuts_train.*.jsonl.gz
         """
         self.manifest_dir = Path(manifest_dir)
+        self.num_splits = num_splits
 
     def train_cuts(self) -> CutSet:
         logging.info("About to get multidataset train cuts")
 
         filenames = glob.glob(
-            f"{self.manifest_dir}/multidataset_split_29/multidataset/multidataset_cuts_train.*.jsonl.gz"
+            f"{self.manifest_dir}/multidataset_split_{self.num_splits}/multidataset/multidataset_cuts_train.*.jsonl.gz"
         )
 
         pattern = re.compile(r"multidataset_cuts_train.([0-9]+).jsonl.gz")
