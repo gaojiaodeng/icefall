@@ -10,7 +10,7 @@ stop_stage=100
 
 num_splits=0
 
-giga_Level = S
+giga_Level=S
 
 dl_dir=$PWD/download
 
@@ -52,13 +52,13 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
     log "Dataset: GigaSpeech"
     if [ ! -f data/.giga_dataset.done ]; then
-      ln -svf ../../gigaspeech/ASR/data/manifests/gigaspeech_* manifests/.
-      ln -svf ../../gigaspeech/ASR/data/fbank/cuts_* .
-      ln -svf ../../gigaspeech/ASR/data/fbank/feats_* .
-      ln -svf ../../gigaspeech/ASR/data/fbank/gigaspeech_* .
-      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split .
+      ln -svf ../../gigaspeech/ASR/data/manifests/gigaspeech_* data/manifests/.
+      ln -svf ../../gigaspeech/ASR/data/fbank/cuts_* data/fbank/.
+      ln -svf ../../gigaspeech/ASR/data/fbank/feats_* data/fbank/.
+      ln -svf ../../gigaspeech/ASR/data/fbank/gigaspeech_* data/fbank/.
+      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split data/fbank/.
       mkdir -p  data/fbank/multidataset_split_${num_splits}
-      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split/cuts_${giga_Level}.*.json.gz .
+      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split/cuts_${giga_Level}.*.jsonl.gz data/fbank/multidataset_split_${num_splits}/.
       touch data/.giga_dataset.done
     fi
   fi
@@ -67,7 +67,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   if [[ "${multidataset[@]}" =~ "commonvoice" ]]; then
     if [ ! -f data/.cv_dataset.done ]; then
       log "Dataset: CommonVoice"
-      ln -svf $PWD../../commonvoice/ASR/data/en .
+      ln -s ../../commonvoice/ASR/data/en data/en
       touch data/.cv_dataset.done
     fi
   fi
@@ -94,7 +94,7 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
 
     if [ ! -f $split_dir/.multidataset_mix.done ]; then
       log "Mix multidataset"
-      for ((seq=0; seq<$nums_plits; seq++)); do
+      for ((seq=0; seq<${nums_plits}; seq++)); do
         fseq=$(printf "%02d" $seq)
         gunzip -c $split_dir/*.*${fseq}.jsonl.gz | \
         shuf | gzip -c > $split_dir/multidataset/multidataset_cuts_train.${fseq}.jsonl.gz
