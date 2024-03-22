@@ -52,13 +52,13 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   if [[ "${multidataset[@]}" =~ "gigaspeech" ]]; then
     log "Dataset: GigaSpeech"
     if [ ! -f data/.giga_dataset.done ]; then
-      ln -svf ../../gigaspeech/ASR/data/manifests/gigaspeech_* data/manifests/.
-      ln -svf ../../gigaspeech/ASR/data/fbank/cuts_* data/fbank/.
-      ln -svf ../../gigaspeech/ASR/data/fbank/feats_* data/fbank/.
-      ln -svf ../../gigaspeech/ASR/data/fbank/gigaspeech_* data/fbank/.
-      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split data/fbank/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/manifests/gigaspeech_* data/manifests/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/cuts_* data/fbank/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/feats_* data/fbank/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/gigaspeech_* data/fbank/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_Level}_split data/fbank/.
       mkdir -p  data/fbank/multidataset_split_${num_splits}
-      ln -svf ../../gigaspeech/ASR/data/fbank/${giga_Level}_split/cuts_${giga_Level}.*.jsonl.gz data/fbank/multidataset_split_${num_splits}/.
+      ln -svf $PWD/../../gigaspeech/ASR/data/fbank/${giga_Level}_split/cuts_${giga_Level}.*.jsonl.gz data/fbank/multidataset_split_${num_splits}/.
       touch data/.giga_dataset.done
     fi
   fi
@@ -67,7 +67,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   if [[ "${multidataset[@]}" =~ "commonvoice" ]]; then
     if [ ! -f data/.cv_dataset.done ]; then
       log "Dataset: CommonVoice"
-      ln -s ../../commonvoice/ASR/data/en data/en
+      ln -s $PWD/../../commonvoice/ASR/data/en data/en
       touch data/.cv_dataset.done
     fi
   fi
